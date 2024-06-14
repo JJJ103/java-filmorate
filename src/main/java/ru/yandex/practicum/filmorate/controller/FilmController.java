@@ -18,6 +18,7 @@ import java.util.Map;
 public class FilmController {
 
     private final Map<Long, Film> films = new HashMap<>();
+    private long currentId = 0;
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
@@ -52,11 +53,6 @@ public class FilmController {
     }
 
     private long getNextId() {
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+        return ++currentId;
     }
 }
