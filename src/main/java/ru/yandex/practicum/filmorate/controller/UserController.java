@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @RequestMapping("/users")
