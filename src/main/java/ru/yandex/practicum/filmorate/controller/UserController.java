@@ -2,53 +2,66 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
 
-    private final Map<Long, User> users = new HashMap<>();
-    private long currentId = 0;
+    private final UserStorage userStorage;
+    private final UserService userService;
+
+    public UserController(UserStorage userStorage) {
+        this.userStorage = userStorage;
+        this.userService = new UserService(userStorage);
+    }
 
     @GetMapping
     public Collection<User> getAll() {
-        return users.values();
+        return userStorage.getAllUsers();
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody User user) {
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-        user.setId(getNextId());
-        users.put(user.getId(), user);
-        log.info("Создан пользователь: {}", user);
-        return user;
+        return userStorage.addUser(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        if (!users.containsKey(user.getId())) {
-            throw new NotFoundException("Ошибка: пользователь не найден");
-        }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-        users.put(user.getId(), user);
-        log.info("Пользователь обновлен: {}", user);
-        return user;
+        return userStorage.updateUser(user);
     }
 
-    // Вспомогательный метод для генерации идентификатора нового пользователя
-    private long getNextId() {
-        return ++currentId;
+    @GetMapping("/{id}")
+    public User getFilmById(@PathVariable String id) {
+        return userStorage.getUserById(id);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable String id, @PathVariable String friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable String id, @PathVariable String friendId) {
+        userService.removeFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public Collection<User> getFriends(@PathVariable String id) {
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(@PathVariable String id, @PathVariable String otherId) {
+        return userService.getCommonFriends(id, otherId);
     }
 }
