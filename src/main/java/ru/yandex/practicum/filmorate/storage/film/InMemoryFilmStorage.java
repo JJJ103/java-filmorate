@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
+
     private final Map<Long, Film> films = new HashMap<>();
     private long currentId = 0;
 
@@ -39,7 +40,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilmById (String id) {
+    public Film getFilmById(String id) {
         if (!id.matches("\\d+")) {
             throw new ValidationException("ID должен быть числом");
         }
@@ -123,6 +124,5 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.error("Ошибка валидации: дата релиза не может быть раньше 28 декабря 1895 года");
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
-        // Additional validations can be added here if needed
     }
 }

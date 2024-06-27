@@ -12,6 +12,7 @@ import java.util.*;
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
+
     private final Map<Long, User> users = new HashMap<>();
     private long currentId = 0;
 
@@ -45,7 +46,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById (String id) {
+    public User getUserById(String id) {
         long userId = validUserIdToLong(id);
 
         return users.get(userId);
@@ -63,7 +64,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (!users.containsKey(userId)) {
             throw new NotFoundException("Пользователь с указанным ID не найден");
         }
-        return Long.parseLong(idStr);
+        return userId;
     }
 
     @Override
@@ -137,7 +138,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
-    //вспомогательный метод
+    // Вспомогательный метод
     public boolean containsUserById(Long userId) {
         return users.containsKey(userId);
     }
