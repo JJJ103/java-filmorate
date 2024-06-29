@@ -137,9 +137,4 @@ public class InMemoryUserStorage implements UserStorage {
             user.setName(user.getLogin());
         }
     }
-
-    // Вспомогательный метод
-    public boolean containsUserById(Long userId) {
-        return users.containsKey(userId);
-    }
 }
