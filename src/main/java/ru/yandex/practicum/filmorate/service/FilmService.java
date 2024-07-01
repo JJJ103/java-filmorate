@@ -35,22 +35,22 @@ public class FilmService {
         return filmStorage.getAllFilms();
     }
 
-    public Film getFilmById(String id) {
+    public Film getFilmById(Long id) {
         return filmStorage.getFilmById(id);
     }
 
-    public void likeFilm(String userId, String filmId) {
+    public void likeFilm(Long userId, Long filmId) {
         if (userStorage.getUserById(userId) == null) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
         filmStorage.likeFilm(userId, filmId);
     }
 
-    public void unlikeFilm(String userId, String filmId) {
+    public void unlikeFilm(Long userId, Long filmId) {
         filmStorage.unlikeFilm(userId, filmId);
     }
 
-    public List<Film> getPopularFilms(String count) {
+    public List<Film> getPopularFilms(Integer count) {
         return filmStorage.getPopularFilms(count);
     }
 }

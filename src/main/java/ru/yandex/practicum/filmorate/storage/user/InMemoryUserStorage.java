@@ -49,34 +49,29 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(String id) {
+    public User getUserById(Long id) {
         log.info("Запрос на получение пользователя по ID: {}", id);
-        long userId = validUserIdToLong(id);
+        long userId = validUserId(id);
 
         return users.get(userId);
     }
 
-    private long validUserIdToLong(String idStr) {
-        if (!idStr.matches("\\d+")) {
-            throw new ValidationException("ID должен быть числом");
-        }
-        long userId = Long.parseLong(idStr);
-
-        if (userId <= 0) {
-            throw new ValidationException("ID должен быть больше нуля");
-        }
-        if (!users.containsKey(userId)) {
+    private long validUserId(Long id) {
+        if (!users.containsKey(id)) {
             throw new NotFoundException("Пользователь с указанным ID не найден");
         }
-        return userId;
+        return id;
     }
 
     @Override
-    public void addFriend(String userIdStr, String friendIdStr) {
-        log.info("Попытка добавления в друзья пользователем с ID {} пользователя с ID {}", userIdStr, friendIdStr);
-        User user = getUserById(userIdStr);
-        User friendUser = getUserById(friendIdStr);
+    public void addFriend(Long userId, Long friendId) {
+        log.info("Попытка добавления в друзья пользователем с ID {} пользователя с ID {}", userId, friendId);
+        User user = getUserById(userId);
+        User friendUser = getUserById(friendId);
 
+        if (user.getId() == friendUser.getId()) {
+            throw new ValidationException("Невозможно добавить самого себя в друзья");
+        }
         if (user.getFriends() == null & friendUser.getFriends() == null) {
             user.addFriend(friendUser.getId());
             friendUser.addFriend(user.getId());
@@ -88,38 +83,38 @@ public class InMemoryUserStorage implements UserStorage {
 
         user.addFriend(friendUser.getId());
         friendUser.addFriend(user.getId());
-        log.info("Пользователи с ID {} и {} стали друзьями", userIdStr, friendIdStr);
+        log.info("Пользователи с ID {} и {} стали друзьями", userId, friendId);
     }
 
     @Override
-    public void removeFriend(String userIdStr, String friendIdStr) {
-        log.info("Попытка удаления из друзей пользователем с ID {} пользователя с ID {}", userIdStr, friendIdStr);
-        User user = getUserById(userIdStr);
-        User friendUser = getUserById(friendIdStr);
+    public void removeFriend(Long userId, Long friendId) {
+        log.info("Попытка удаления из друзей пользователем с ID {} пользователя с ID {}", userId, friendId);
+        User user = getUserById(userId);
+        User friendUser = getUserById(friendId);
 
         user.getFriends().remove(friendUser.getId());
         friendUser.getFriends().remove(user.getId());
-        log.info("Пользователи с ID {} и {} больше не друзья", userIdStr, friendIdStr);
+        log.info("Пользователи с ID {} и {} больше не друзья", userId, friendId);
     }
 
     @Override
-    public Collection<User> getFriends(String userIdStr) {
-        log.info("Запрос на получение друзей пользователя с ID {}", userIdStr);
-        User user = getUserById(userIdStr);
+    public Collection<User> getFriends(Long userId) {
+        log.info("Запрос на получение друзей пользователя с ID {}", userId);
+        User user = getUserById(userId);
 
         Set<Long> friendIds = user.getFriends();
         List<User> friends = new ArrayList<>();
 
         for (Long friendId : friendIds) {
-            User friend = getUserById(String.valueOf(friendId));
+            User friend = getUserById(friendId);
             friends.add(friend);
         }
-        log.info("Пользователь с ID {} имеет друзей: {}", userIdStr, friends);
+        log.info("Пользователь с ID {} имеет друзей: {}", userId, friends);
         return friends;
     }
 
     @Override
-    public List<User> getCommonFriends(String userId, String otherId) {
+    public List<User> getCommonFriends(Long userId, Long otherId) {
         log.info("Запрос на получение общих друзей пользователей с ID {} и {}", userId, otherId);
         User user = getUserById(userId);
         User otherUser = getUserById(otherId);
@@ -142,9 +137,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     private void validateUser(User user) {
-        if (user == null) {
-            throw new ServerErrorException("Внутренняя ошибка сервера");
-        }
+
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
             log.info("Установлено имя пользователя: {}", user.getName());

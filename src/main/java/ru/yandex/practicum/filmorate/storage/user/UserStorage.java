@@ -11,13 +11,13 @@ public interface UserStorage {
 
     Collection<User> getAllUsers();
 
-    User getUserById(String id);
+    User getUserById(Long id);
 
-    void addFriend(String userId, String friendId);
+    void addFriend(Long userId, Long friendId);
 
-    void removeFriend(String userId, String friendId);
+    void removeFriend(Long userId, Long friendId);
 
-    Collection<User> getFriends(String userId);
+    Collection<User> getFriends(Long userId);
 
-    Collection<User> getCommonFriends(String userId, String otherUserId);
+    Collection<User> getCommonFriends(Long userId, Long otherUserId);
 }

@@ -12,11 +12,11 @@ public interface FilmStorage {
 
     Collection<Film> getAllFilms();
 
-    Film getFilmById(String id);
+    Film getFilmById(Long id);
 
-    void likeFilm(String filmId, String userId);
+    void likeFilm(Long filmId, Long userId);
 
-    void unlikeFilm(String filmId, String userId);
+    void unlikeFilm(Long filmId, Long userId);
 
-    List<Film> getPopularFilms(String count);
+    List<Film> getPopularFilms(Integer count);
 }

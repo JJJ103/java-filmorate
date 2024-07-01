@@ -29,23 +29,23 @@ public class UserService {
         return userStorage.updateUser(user);
     }
 
-    public User getUserById(String id) {
+    public User getUserById(Long id) {
         return userStorage.getUserById(id);
     }
 
-    public void addFriend(String userId, String friendId) {
+    public void addFriend(Long userId, Long friendId) {
         userStorage.addFriend(userId, friendId);
     }
 
-    public void removeFriend(String userId, String friendId) {
+    public void removeFriend(Long userId, Long friendId) {
         userStorage.removeFriend(userId, friendId);
     }
 
-    public Collection<User> getFriends(String userId) {
+    public Collection<User> getFriends(Long userId) {
         return userStorage.getFriends(userId);
     }
 
-    public Collection<User> getCommonFriends(String userId, String otherId) {
+    public Collection<User> getCommonFriends(Long userId, Long otherId) {
         return userStorage.getCommonFriends(userId, otherId);
     }
 }
