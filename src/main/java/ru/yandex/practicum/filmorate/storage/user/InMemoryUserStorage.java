@@ -18,6 +18,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
+        log.info("Попытка добавления пользователя: {}", user);
         validateUser(user);
         user.setId(getNextId());
         users.put(user.getId(), user);
@@ -27,6 +28,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
+        log.info("Попытка обновления пользователя: {}", user);
         validateUser(user);
         if (!users.containsKey(user.getId())) {
             throw new NotFoundException("Ошибка: пользователь не найден");
@@ -38,6 +40,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Collection<User> getAllUsers() {
+        log.info("Запрос на получение всех пользователей");
         return users.values();
     }
 
@@ -47,6 +50,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getUserById(String id) {
+        log.info("Запрос на получение пользователя по ID: {}", id);
         long userId = validUserIdToLong(id);
 
         return users.get(userId);
@@ -69,6 +73,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void addFriend(String userIdStr, String friendIdStr) {
+        log.info("Попытка добавления в друзья пользователем с ID {} пользователя с ID {}", userIdStr, friendIdStr);
         User user = getUserById(userIdStr);
         User friendUser = getUserById(friendIdStr);
 
@@ -83,19 +88,23 @@ public class InMemoryUserStorage implements UserStorage {
 
         user.addFriend(friendUser.getId());
         friendUser.addFriend(user.getId());
+        log.info("Пользователи с ID {} и {} стали друзьями", userIdStr, friendIdStr);
     }
 
     @Override
     public void removeFriend(String userIdStr, String friendIdStr) {
+        log.info("Попытка удаления из друзей пользователем с ID {} пользователя с ID {}", userIdStr, friendIdStr);
         User user = getUserById(userIdStr);
         User friendUser = getUserById(friendIdStr);
 
         user.getFriends().remove(friendUser.getId());
         friendUser.getFriends().remove(user.getId());
+        log.info("Пользователи с ID {} и {} больше не друзья", userIdStr, friendIdStr);
     }
 
     @Override
     public Collection<User> getFriends(String userIdStr) {
+        log.info("Запрос на получение друзей пользователя с ID {}", userIdStr);
         User user = getUserById(userIdStr);
 
         Set<Long> friendIds = user.getFriends();
@@ -105,11 +114,13 @@ public class InMemoryUserStorage implements UserStorage {
             User friend = getUserById(String.valueOf(friendId));
             friends.add(friend);
         }
+        log.info("Пользователь с ID {} имеет друзей: {}", userIdStr, friends);
         return friends;
     }
 
     @Override
     public List<User> getCommonFriends(String userId, String otherId) {
+        log.info("Запрос на получение общих друзей пользователей с ID {} и {}", userId, otherId);
         User user = getUserById(userId);
         User otherUser = getUserById(otherId);
 
@@ -126,6 +137,7 @@ public class InMemoryUserStorage implements UserStorage {
             commonFriends.add(users.get(id));
         }
 
+        log.info("Общие друзья пользователей с ID {} и {}: {}", userId, otherId, commonFriends);
         return commonFriends;
     }
 
@@ -135,6 +147,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
+            log.info("Установлено имя пользователя: {}", user.getName());
         }
     }
 }
