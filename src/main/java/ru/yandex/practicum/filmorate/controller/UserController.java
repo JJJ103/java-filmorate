@@ -1,54 +1,64 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
+@Validated
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
 
-    private final Map<Long, User> users = new HashMap<>();
-    private long currentId = 0;
+    private final UserService userService;
 
     @GetMapping
     public Collection<User> getAll() {
-        return users.values();
+        return userService.getAllUsers();
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody User user) {
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-        user.setId(getNextId());
-        users.put(user.getId(), user);
-        log.info("Создан пользователь: {}", user);
-        return user;
+        return userService.addUser(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        if (!users.containsKey(user.getId())) {
-            throw new NotFoundException("Ошибка: пользователь не найден");
-        }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-        users.put(user.getId(), user);
-        log.info("Пользователь обновлен: {}", user);
-        return user;
+        return userService.updateUser(user);
     }
 
-    // Вспомогательный метод для генерации идентификатора нового пользователя
-    private long getNextId() {
-        return ++currentId;
+    @GetMapping("/{id}")
+    public User getFilmById(@PathVariable @PositiveOrZero Long id) {
+        return userService.getUserById(id);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long friendId) {
+        userService.removeFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public Collection<User> getFriends(@PathVariable @PositiveOrZero Long id) {
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long otherId) {
+        return userService.getCommonFriends(id, otherId);
     }
 }
