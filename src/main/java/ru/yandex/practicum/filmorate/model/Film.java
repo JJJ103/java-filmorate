@@ -28,4 +28,25 @@ public class Film {
     private int duration;
 
     private Set<Long> likedByUser = new HashSet<>();
+
+    private Set<Genre> genres = new HashSet<>();
+
+    private MPA rating;
+
+    public enum Genre {
+        COMEDY,
+        DRAMA,
+        ANIMATION,
+        THRILLER,
+        DOCUMENTARY,
+        ACTION
+    }
+
+    public enum MPA {
+        G,
+        PG,
+        PG_13,
+        R,
+        NC_17
+    }
 }

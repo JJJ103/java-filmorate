@@ -24,10 +24,23 @@ public class User {
 
     private Set<Long> friends = new HashSet<>();
 
+    private Set<Friendship> friendships = new HashSet<>();
+
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
 
     public void addFriend(Long id) {
         friends.add(id);
+    }
+
+    public enum FriendshipStatus {
+        PENDING,
+        CONFIRMED
+    }
+
+    @Data
+    public static class Friendship {
+        private long friendId;
+        private FriendshipStatus status;
     }
 }
