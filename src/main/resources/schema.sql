@@ -1,4 +1,4 @@
--- Создаем таблицу Users
+-- Таблица Users
 CREATE TABLE IF NOT EXISTS users (
     user_id BIGINT PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     birthday DATE
 );
 
--- Создаем таблицу Films
+-- Таблица Films
 CREATE TABLE IF NOT EXISTS films (
     film_id BIGINT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS films (
     duration INT NOT NULL
 );
 
--- Создаем таблицу Friendships
+-- Таблица Friendships
 CREATE TABLE IF NOT EXISTS friendships (
     user_id BIGINT,
     friend_id BIGINT,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS friendships (
     FOREIGN KEY (friend_id) REFERENCES users(user_id)
 );
 
--- Создаем таблицу Likes
+-- Таблица Likes
 CREATE TABLE IF NOT EXISTS likes (
     film_id BIGINT,
     user_id BIGINT,
@@ -35,13 +35,13 @@ CREATE TABLE IF NOT EXISTS likes (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
--- Создаем таблицу Genres
+-- Таблица Genres
 CREATE TABLE IF NOT EXISTS genres (
     genre_id BIGINT PRIMARY KEY,
     name VARCHAR(50) NOT NULL
 );
 
--- Создаем таблицу FilmGenres
+-- Таблица FilmGenres
 CREATE TABLE IF NOT EXISTS film_genres (
     film_id BIGINT,
     genre_id BIGINT,
@@ -50,13 +50,13 @@ CREATE TABLE IF NOT EXISTS film_genres (
     FOREIGN KEY (genre_id) REFERENCES genres(genre_id)
 );
 
--- Создаем таблицу Ratings
+-- Таблица Ratings
 CREATE TABLE IF NOT EXISTS ratings (
     rating_id BIGINT PRIMARY KEY,
     MPA VARCHAR(5) NOT NULL
 );
 
--- Создаем таблицу FilmRatings
+-- Таблица FilmRatings
 CREATE TABLE IF NOT EXISTS film_ratings (
     film_id BIGINT,
     rating_id BIGINT,
