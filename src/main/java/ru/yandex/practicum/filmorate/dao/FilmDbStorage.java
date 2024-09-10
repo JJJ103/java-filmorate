@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dao.mapper.FilmMapper;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -14,68 +14,73 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
+@Repository
 @Slf4j
-public class FilmDbStorage implements FilmStorage {
-
-    private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<Film> filmRowMapper = new FilmMapper();
+public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     private static final String INSERT_QUERY = "INSERT INTO films (name, description, release_date, duration) VALUES (?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ? WHERE id = ?";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE id = ?";
     private static final String FIND_ALL_QUERY = " SELECT * FROM films";
+    private static final String LIKE_FILM_QUERY = "INSERT INTO film_likes (film_id, user_id) VALUES (?, ?)";
+    private static final String UNLIKE_FILM_QUERY = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
+    private static final String GET_POPULAR_FILMS_QUERY = "SELECT f.id, f.name, f.description, f.release_date, f.duration, COUNT(fl.user_id) AS likes " +
+            "FROM films f LEFT JOIN film_likes fl ON f.id = fl.film_id GROUP BY f.id ORDER BY likes DESC LIMIT ?";
+
+    public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
+        super(jdbc, mapper, Film.class);
+    }
 
     @Override
     public Film addFilm(Film film) {
-        jdbcTemplate.update(INSERT_QUERY, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration());
+        long id = insert(
+                INSERT_QUERY,
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration()
+        );
+        film.setId(id);
         return film;
     }
 
     @Override
     public Film updateFilm(Film film) {
-        jdbcTemplate.update(UPDATE_QUERY, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getId());
+        update(
+                UPDATE_QUERY,
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                film.getId()
+        );
         return film;
     }
 
     @Override
     public List<Film> getAllFilms() {
-        return jdbcTemplate.query(FIND_ALL_QUERY, filmRowMapper);
+        return findMany(FIND_ALL_QUERY);
     }
 
     @Override
     public Film getFilmById(Long id) {
-        return jdbcTemplate.queryForObject(FIND_BY_ID_QUERY, filmRowMapper, id);
+        return findOne(FIND_BY_ID_QUERY, id)
+                .orElseThrow(() -> new ValidationException("Фильм с таким ID не найден"));
     }
 
     @Override
     public void likeFilm(Long filmId, Long userId) {
-        log.info("Попытка лайкнуть фильм с ID {} пользователем с ID {}", filmId, userId);
-
-        String checkLikeQuery = "SELECT COUNT(*) FROM likes WHERE film_id = ? AND user_id = ?";
-        Integer likeCount = jdbcTemplate.queryForObject(checkLikeQuery, Integer.class, filmId, userId);
-
-        if (likeCount != null && likeCount > 0) {
-            log.info("Пользователь с ID {} уже лайкнул фильм с ID {}", userId, filmId);
-            return;
-        }
-
-        // Добавление лайка
-        String addLikeQuery = "INSERT INTO likes (film_id, user_id) VALUES (?, ?)";
-        jdbcTemplate.update(addLikeQuery, filmId, userId);
-
-        log.info("Фильм с ID {} был лайкнут пользователем с ID {}", filmId, userId);
+        jdbc.update(LIKE_FILM_QUERY, filmId, userId);
     }
 
     @Override
     public void unlikeFilm(Long filmId, Long userId) {
-        // Логика для удаления лайка
+        jdbc.update(UNLIKE_FILM_QUERY, filmId, userId);
     }
 
     @Override
     public List<Film> getPopularFilms(Integer count) {
-        // Логика для получения популярных фильмов
-        return null;
+        return jdbc.query(GET_POPULAR_FILMS_QUERY, mapper, count);
     }
 
     private void validateFilm(Film film) {
