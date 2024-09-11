@@ -33,14 +33,10 @@ public class User {
         friends.add(id);
     }
 
-    public enum FriendshipStatus {
-        PENDING,
-        CONFIRMED
-    }
-
     @Data
     public static class Friendship {
         private long friendId;
-        private FriendshipStatus status;
+        private boolean isConfirmed;
+        // true - дружба подтверждена, false - запрос отправлен, но не подтвержден
     }
 }
