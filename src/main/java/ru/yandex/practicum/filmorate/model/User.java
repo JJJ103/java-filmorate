@@ -37,6 +37,6 @@ public class User {
     public static class Friendship {
         private long friendId;
         private boolean isConfirmed;
-        // true - дружба подтверждена, false - запрос отправлен, но не подтвержден
+        //true - дружба подтверждена, false - запрос отправлен, но не подтвержден
     }
 }

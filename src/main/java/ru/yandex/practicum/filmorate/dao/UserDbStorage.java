@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.mapper.UserRowMapper;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -41,13 +42,12 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
             "SELECT u.* FROM users u JOIN friendships f ON u.user_id = f.friend_id WHERE f.user_id = ?";
 
     private static final String GET_COMMON_FRIENDS_QUERY =
-            "SELECT u.* FROM users u " +
-                    "JOIN friendships f1 ON u.user_id = f1.friend_id " +
-                    "JOIN friendships f2 ON u.user_id = f2.friend_id " +
-                    "WHERE f1.user_id = ? AND f2.user_id = ?";
+            "SELECT * FROM users u " +
+                    "JOIN friendships f ON u.user_id = f.friend_id " +
+                    "WHERE f.user_id = ? AND f.status = true";
 
-    public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper, Class<User> entityType) {
-        super(jdbc, mapper, entityType);
+    public UserDbStorage(JdbcTemplate jdbc, UserRowMapper mapper) {
+        super(jdbc, mapper, User.class);
     }
 
     @Override
@@ -99,6 +99,9 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
 
     @Override
     public Collection<User> getFriends(Long userId) {
+        String GET_FRIENDS_QUERY = "SELECT * FROM users u " +
+                "JOIN friendships f ON u.user_id = f.friend_id " +
+                "WHERE f.user_id = ? AND f.is_confirmed = true";
         return jdbc.query(GET_FRIENDS_QUERY, mapper, userId);
     }
 
