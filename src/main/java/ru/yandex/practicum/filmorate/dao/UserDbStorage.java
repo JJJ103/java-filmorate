@@ -1,19 +1,15 @@
 package ru.yandex.practicum.filmorate.dao;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dao.mapper.UserRowMapper;
+import ru.yandex.practicum.filmorate.dao.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
-import java.util.List;
 
 @Component
 @Repository
@@ -42,7 +38,8 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
             "SELECT u.* FROM users u JOIN friendships f ON u.user_id = f.friend_id WHERE f.user_id = ?";
 
     private static final String GET_COMMON_FRIENDS_QUERY =
-            "SELECT * FROM users u " +
+            "SELECT u.*" +
+                    "FROM users u" +
                     "JOIN friendships f ON u.user_id = f.friend_id " +
                     "WHERE f.user_id = ? AND f.status = true";
 

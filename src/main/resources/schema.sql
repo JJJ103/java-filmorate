@@ -1,6 +1,6 @@
 -- Таблица Users
 CREATE TABLE IF NOT EXISTS users (
-    user_id BIGINT PRIMARY KEY,
+    user_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     login VARCHAR(255) NOT NULL,
     name VARCHAR(255),
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Таблица Films
 CREATE TABLE IF NOT EXISTS films (
-    film_id BIGINT PRIMARY KEY,
+    film_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255),
     release_date DATE NOT NULL,

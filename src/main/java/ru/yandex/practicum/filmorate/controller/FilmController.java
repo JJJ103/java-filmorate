@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -22,7 +23,8 @@ public class FilmController {
     private final FilmService filmService;
 
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) {
+    public FilmDto create(@Valid @RequestBody FilmDto film) {
+        log.info("Полученный фильм в контроллере: {}", film);
         return filmService.addFilm(film);
     }
 
