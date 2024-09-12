@@ -1,20 +1,15 @@
 package ru.yandex.practicum.filmorate.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-public class FilmDto {
+public class NewFilmRequest {
     private String name;
     private String description;
 
-    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     private LocalDate releaseDate;
-
     private int duration;
-
-    //private Set<Film.Genre> genres;
-    //private Film.MPA rating;
 }

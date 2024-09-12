@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -29,14 +31,16 @@ public class FilmService {
         this.userStorage = userStorage;
     }
 
-    public FilmDto addFilm(FilmDto film) {
-        log.info("Попытка добавления фильма: {}", film);
+    public FilmDto addFilm(NewFilmRequest newFilmRequest) {
+        log.info("Попытка добавления фильма: {}", newFilmRequest);
+
+        Film film = FilmMapper.mapToFilm(newFilmRequest);
 
         validateFilm(film);
 
         Film savedFilm = filmStorage.addFilm(film);
         log.info("Фильм добавлен: {}", savedFilm);
-        return savedFilm;
+        return FilmMapper.mapToFilmDto(savedFilm);
     }
 
     public Film updateFilm(Film film) {
