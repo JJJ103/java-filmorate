@@ -49,6 +49,7 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
 
     @Override
     public User addUser(User user) {
+
         long id = insert(
                 INSERT_USER_QUERY,
                 user.getEmail(),
@@ -57,7 +58,9 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
                 user.getBirthday()
         );
         user.setId(id);
-        return user;
+
+        log.info("Пользователь с ID {} успешно добавлен", id);
+        return getUserById(id);
     }
 
     @Override
