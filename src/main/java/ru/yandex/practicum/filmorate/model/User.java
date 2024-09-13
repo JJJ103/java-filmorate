@@ -22,21 +22,12 @@ public class User {
 
     private String name;
 
-    private Set<Long> friends = new HashSet<>();
-
-    private Set<Friendship> friendships = new HashSet<>();
-
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
 
+    private Set<Long> friends = new HashSet<>();
+
     public void addFriend(Long id) {
         friends.add(id);
-    }
-
-    @Data
-    public static class Friendship {
-        private long friendId;
-        private boolean isConfirmed;
-        //true - дружба подтверждена, false - запрос отправлен, но не подтвержден
     }
 }

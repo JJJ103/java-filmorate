@@ -63,16 +63,15 @@ public class FilmService {
 
     public void likeFilm(Long userId, Long filmId) {
         log.info("Попытка лайкнуть фильм с ID {} пользователем с ID {}", filmId, userId);
-        if (userStorage.getUserById(userId) == null) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        userStorage.getUserById(userId); // Проверка существования пользователя
+        filmStorage.getFilmById(filmId); // Проверка существования фильма
         filmStorage.likeFilm(userId, filmId);
         log.info("Фильм с ID {} был лайкнут пользователем с ID {}", filmId, userId);
     }
 
     public void unlikeFilm(Long userId, Long filmId) {
         log.info("Попытка удаления лайка с фильма с ID {} пользователем с ID {}", filmId, userId);
-        filmStorage.unlikeFilm(userId, filmId);
+        filmStorage.unlikeFilm(filmId, userId); // Поменяли местами параметры
         log.info("Лайк пользователя с ID {} был удален с фильма с ID {}", userId, filmId);
     }
 

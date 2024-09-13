@@ -42,13 +42,13 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     "LEFT JOIN ratings r ON f.rating_id = r.rating_id";
 
     private static final String LIKE_FILM_QUERY =
-            "INSERT INTO likes (film_id, user_id) VALUES (?, ?)";
+            "INSERT INTO likes (user_id, film_id) VALUES (?, ?)";
 
     private static final String UNLIKE_FILM_QUERY =
-            "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
+            "DELETE FROM likes WHERE user_id = ? AND film_id = ?";
 
     private static final String CHECK_LIKE_EXISTS_QUERY = "SELECT EXISTS (SELECT 1 FROM likes WHERE " +
-            "film_id = ? AND user_id = ?)";
+            "user_id = ? AND film_id = ?)";
 
     private static final String GET_POPULAR_FILMS_QUERY =
             "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, f.rating_id, " +
@@ -137,14 +137,9 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     @Override
     public Film getFilmById(Long id) {
-        String sql = "SELECT f.*, r.name AS rating_name " +
-                "FROM films f " +
-                "LEFT JOIN ratings r ON f.rating_id = r.rating_id " +
-                "WHERE f.film_id = ?";
-        Film film = findOne(sql, id)
-                .orElseThrow(() -> new ValidationException("Фильм с указанным ID не найден"));
-
-        // Загрузка жанров лайков
+        Film film = findOne(FIND_BY_ID_QUERY, id)
+                .orElseThrow(() -> new NotFoundException("Фильм с указанным ID не найден"));
+        // Загрузка жанров и лайков
         loadGenresForFilm(film);
         loadLikesForFilm(film);
 
@@ -152,30 +147,40 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public void likeFilm(Long filmId, Long userId) {
+    public void likeFilm(Long userId, Long filmId) {
         validateFilm(filmId);
+        validateUser(userId);
 
         // Проверяем, лайкнул ли уже пользователь фильм
-        Boolean exists = jdbc.queryForObject(CHECK_LIKE_EXISTS_QUERY, Boolean.class, filmId, userId);
+        Boolean exists = jdbc.queryForObject(CHECK_LIKE_EXISTS_QUERY, Boolean.class, userId, filmId);
 
         if (Boolean.TRUE.equals(exists)) {
             log.info("Пользователь с ID {} уже лайкнул фильм с ID {}", userId, filmId);
             return;
         }
 
-        jdbc.update(LIKE_FILM_QUERY, filmId, userId);
+        jdbc.update(LIKE_FILM_QUERY, userId, filmId);
+    }
+
+    private void validateUser(Long userId) {
+        String sql = "SELECT COUNT(*) FROM users WHERE user_id = ?";
+        Integer count = jdbc.queryForObject(sql, Integer.class, userId);
+        if (count == null || count == 0) {
+            throw new NotFoundException("Пользователь с указанным ID не найден");
+        }
     }
 
     @Override
     public void unlikeFilm(Long filmId, Long userId) {
         validateFilm(filmId);
-        Boolean exists = jdbc.queryForObject(CHECK_LIKE_EXISTS_QUERY, Boolean.class, filmId, userId);
+
+        Boolean exists = jdbc.queryForObject(CHECK_LIKE_EXISTS_QUERY, Boolean.class, userId, filmId);
 
         if (Boolean.FALSE.equals(exists)) {
             throw new NotFoundException("Лайк не был поставлен");
         }
 
-        jdbc.update(UNLIKE_FILM_QUERY, filmId, userId);
+        jdbc.update(UNLIKE_FILM_QUERY, userId, filmId);
     }
 
     @Override

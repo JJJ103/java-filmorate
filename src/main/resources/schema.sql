@@ -32,9 +32,9 @@ CREATE TABLE IF NOT EXISTS films (
 
 -- Таблица Friendships
 CREATE TABLE IF NOT EXISTS friendships (
-    user_id BIGINT,
-    friend_id BIGINT,
-    status BOOLEAN,  -- true - дружба подтверждена, false - запрос на дружбу
+    user_id BIGINT NOT NULL,
+    friend_id BIGINT NOT NULL,
+    status BOOLEAN DEFAULT FALSE,  -- true - дружба подтверждена, false - запрос на дружбу
     PRIMARY KEY (user_id, friend_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (friend_id) REFERENCES users(user_id)
@@ -42,8 +42,8 @@ CREATE TABLE IF NOT EXISTS friendships (
 
 -- Таблица Likes
 CREATE TABLE IF NOT EXISTS likes (
-    film_id BIGINT,
     user_id BIGINT,
+    film_id BIGINT,
     PRIMARY KEY (film_id, user_id),
     FOREIGN KEY (film_id) REFERENCES films(film_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
