@@ -83,7 +83,8 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         // Сохранение жанров
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             String genreSql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
-            for (Genre genre : film.getGenres()) {
+            Set<Genre> uniqueGenres = new HashSet<>(film.getGenres());
+            for (Genre genre : uniqueGenres) {
                 jdbc.update(genreSql, filmId, genre.getId());
             }
         }
