@@ -4,7 +4,9 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -29,24 +31,7 @@ public class Film {
 
     private Set<Long> likedByUser = new HashSet<>();
 
-    private Set<Genre> genres = new HashSet<>();
+    private List<Genre> genres = new ArrayList<>();
 
-    private MPA rating;
-
-    public enum Genre {
-        COMEDY,
-        DRAMA,
-        ANIMATION,
-        THRILLER,
-        DOCUMENTARY,
-        ACTION
-    }
-
-    public enum MPA {
-        G,
-        PG,
-        PG_13,
-        R,
-        NC_17
-    }
+    private MPA mpa;
 }
