@@ -169,6 +169,7 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
         List<User> commonFriends = jdbc.query(sql, mapper, userId, otherUserId);
         return commonFriends;
     }
+
     private void validateUserExists(Long userId) {
         findOne(FIND_USER_BY_ID_QUERY, userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с указанным ID не найден"));
