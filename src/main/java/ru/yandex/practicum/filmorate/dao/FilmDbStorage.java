@@ -228,6 +228,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             throw new ValidationException("Рейтинг MPA с таким ID не существует");
         }
     }
+
     private void validateGenres(List<Genre> genres) {
         if (genres == null) return;
         for (Genre genre : genres) {
