@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -233,6 +232,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         if (genres == null) return;
         for (Genre genre : genres) {
             String sql = "SELECT COUNT(*) FROM genres WHERE genre_id = ?";
+
             Integer count = jdbc.queryForObject(sql, Integer.class, genre.getId());
             if (count == null || count == 0) {
                 throw new ValidationException("Жанр с ID " + genre.getId() + " не существует");
