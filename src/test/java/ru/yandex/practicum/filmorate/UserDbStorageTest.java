@@ -67,7 +67,7 @@ class UserDbStorageTest {
 
     @Test
     public void testAddFriend() {
-        userStorage.addFriend(1L, 2L);  // User 1 adds User 2 as friend
+        userStorage.addFriend(1L, 2L);
 
         Collection<User> friends = userStorage.getFriends(1L);
         assertThat(friends).hasSize(1);
@@ -83,7 +83,7 @@ class UserDbStorageTest {
 
     @Test
     public void testRemoveFriend() {
-        userStorage.removeFriend(1L, 2L);  // User 1 removes User 2 as friend
+        userStorage.removeFriend(1L, 2L);
 
         Collection<User> friends = userStorage.getFriends(1L);
         assertThat(friends).isEmpty();
@@ -93,6 +93,6 @@ class UserDbStorageTest {
     public void testGetCommonFriends() {
         Collection<User> commonFriends = userStorage.getCommonFriends(1L, 2L);
 
-        assertThat(commonFriends).isEmpty();  // Assuming no common friends at the start
+        assertThat(commonFriends).isEmpty();
     }
 }
