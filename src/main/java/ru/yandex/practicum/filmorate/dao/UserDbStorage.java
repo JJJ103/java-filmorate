@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-@Component
 @Repository
 @Slf4j
 public class UserDbStorage extends BaseRepository<User> implements UserStorage {
@@ -31,28 +30,31 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
             "SELECT * FROM users";
 
     private static final String ADD_FRIEND_QUERY =
-            "INSERT INTO friendships (user_id, friend_id, status) VALUES (?, ?, ?)";
+            "INSERT INTO friendships (user_id, friend_id) VALUES (?, ?)";
 
     private static final String UPDATE_FRIENDSHIP_STATUS_QUERY =
-            "UPDATE friendships SET status = ? WHERE user_id = ? AND friend_id = ?";
+            "UPDATE friendships SET status = TRUE WHERE (user_id = ? AND friend_id = ?) OR " +
+                    "(user_id = ? AND friend_id = ?)";
 
     private static final String REMOVE_FRIEND_QUERY =
             "DELETE FROM friendships WHERE user_id = ? AND friend_id = ?";
 
+    private static final String CHECK_REVERSE = "SELECT status FROM friendships WHERE user_id = ? AND friend_id = ?";
+
     private static final String GET_FRIENDS_QUERY =
-            "SELECT u.* FROM users u " +
+            "SELECT u.*, f.status FROM users u " +
                     "JOIN friendships f ON u.user_id = f.friend_id " +
-                    "WHERE f.user_id = ? AND f.status = TRUE";
+                    "WHERE f.user_id = ?";
 
     private static final String GET_COMMON_FRIENDS_QUERY =
             "SELECT u.* FROM users u " +
                     "JOIN friendships f1 ON u.user_id = f1.friend_id " +
                     "JOIN friendships f2 ON u.user_id = f2.friend_id " +
-                    "WHERE f1.user_id = ? AND f2.user_id = ? AND f1.status = TRUE AND f2.status = TRUE";
+                    "WHERE f1.user_id = ? AND f2.user_id = ?";
 
 
     public UserDbStorage(JdbcTemplate jdbc, UserRowMapper mapper) {
-        super(jdbc, mapper, User.class);
+        super(jdbc, mapper);
     }
 
     @Override
@@ -114,17 +116,14 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
         validateUserExists(friendId);
 
         // Добавляем запись о дружбе с неподтверждённым статусом (по умолчанию FALSE)
-        String sqlInsert = "INSERT INTO friendships (user_id, friend_id) VALUES (?, ?)";
-        jdbc.update(sqlInsert, userId, friendId);
+        jdbc.update(ADD_FRIEND_QUERY, userId, friendId);
 
         // Проверяем, есть ли обратная запись
-        String sqlCheckReverse = "SELECT status FROM friendships WHERE user_id = ? AND friend_id = ?";
-        List<Boolean> reverseStatuses = jdbc.queryForList(sqlCheckReverse, Boolean.class, friendId, userId);
+        List<Boolean> reverseStatuses = jdbc.queryForList(CHECK_REVERSE, Boolean.class, friendId, userId);
 
         if (!reverseStatuses.isEmpty()) {
             // Обновляем статус дружбы в обеих записях на TRUE
-            String sqlUpdateStatus = "UPDATE friendships SET status = TRUE WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)";
-            jdbc.update(sqlUpdateStatus, userId, friendId, friendId, userId);
+            jdbc.update(UPDATE_FRIENDSHIP_STATUS_QUERY, userId, friendId, friendId, userId);
         }
     }
 
@@ -133,13 +132,10 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
         validateUserExists(userId);
         validateUserExists(friendId);
 
-        // Удаляем запись о дружбе
-        String sqlDelete = "DELETE FROM friendships WHERE user_id = ? AND friend_id = ?";
-        jdbc.update(sqlDelete, userId, friendId);
+        jdbc.update(REMOVE_FRIEND_QUERY, userId, friendId);
 
         // Проверяем, был ли статус дружбы подтверждённым у обратной записи
-        String sqlCheckReverse = "SELECT status FROM friendships WHERE user_id = ? AND friend_id = ?";
-        List<Boolean> reverseStatuses = jdbc.queryForList(sqlCheckReverse, Boolean.class, friendId, userId);
+        List<Boolean> reverseStatuses = jdbc.queryForList(CHECK_REVERSE, Boolean.class, friendId, userId);
 
         if (!reverseStatuses.isEmpty() && reverseStatuses.get(0)) {
             // Обновляем статус обратной записи на FALSE
@@ -152,21 +148,15 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     public Collection<User> getFriends(Long userId) {
         validateUserExists(userId);
 
-        String sql = "SELECT u.*, f.status FROM users u " +
-                "JOIN friendships f ON u.user_id = f.friend_id " +
-                "WHERE f.user_id = ?";
-        return jdbc.query(sql, new UserRowMapper(), userId);
+        return jdbc.query(GET_FRIENDS_QUERY, new UserRowMapper(), userId);
     }
 
     @Override
     public Collection<User> getCommonFriends(Long userId, Long otherUserId) {
         validateUserExists(userId);
         validateUserExists(otherUserId);
-        String sql = "SELECT u.* FROM users u " +
-                "JOIN friendships f1 ON u.user_id = f1.friend_id " +
-                "JOIN friendships f2 ON u.user_id = f2.friend_id " +
-                "WHERE f1.user_id = ? AND f2.user_id = ?";
-        List<User> commonFriends = jdbc.query(sql, mapper, userId, otherUserId);
+
+        List<User> commonFriends = jdbc.query(GET_COMMON_FRIENDS_QUERY, mapper, userId, otherUserId);
         return commonFriends;
     }
 

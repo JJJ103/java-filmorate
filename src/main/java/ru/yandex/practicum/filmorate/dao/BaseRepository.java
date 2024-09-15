@@ -16,7 +16,6 @@ import java.util.Optional;
 public class BaseRepository<T> {
     protected final JdbcTemplate jdbc;
     protected final RowMapper<T> mapper;
-    private final Class<T> entityType;
 
     protected Optional<T> findOne(String query, Object... params) {
         try {
@@ -29,11 +28,6 @@ public class BaseRepository<T> {
 
     protected List<T> findMany(String query, Object... params) {
         return jdbc.query(query, mapper, params);
-    }
-
-    public boolean delete(String query, long id) {
-        int rowsDeleted = jdbc.update(query, id);
-        return rowsDeleted > 0;
     }
 
     protected long insert(String query, Object... params) {

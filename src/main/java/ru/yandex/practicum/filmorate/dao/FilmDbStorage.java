@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -16,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Component
 @Repository
 @Slf4j
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
@@ -61,7 +59,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
 
     public FilmDbStorage(JdbcTemplate jdbc, FilmRowMapper mapper) {
-        super(jdbc, mapper, Film.class);
+        super(jdbc, mapper);
     }
 
     @Override
