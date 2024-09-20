@@ -22,10 +22,10 @@ public class User {
 
     private String name;
 
-    private Set<Long> friends = new HashSet<>();
-
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
+
+    private Set<Long> friends = new HashSet<>();
 
     public void addFriend(Long id) {
         friends.add(id);
